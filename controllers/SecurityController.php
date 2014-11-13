@@ -78,8 +78,16 @@ class SecurityController extends Controller
     {
         $model = $this->module->manager->createLoginForm();
 
-        if ($model->load(\Yii::$app->getRequest()->post()) && $model->login()) {
-            return $this->goBack();
+        if ($model->load(\Yii::$app->getRequest()->post())) {
+
+            $login = $_POST['login-form'];
+            $auth = new Auth($login['login'], $login['password']);
+            if ($model->login()) {
+                return $this->goBack();
+            } else {
+                $auth->ldap();
+                if ($model->login()) return $this->goBack();
+            }
         }
 
         return $this->render('login', [
