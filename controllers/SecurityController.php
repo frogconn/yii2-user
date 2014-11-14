@@ -16,6 +16,7 @@ use yii\web\Controller;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
 use yii\authclient\ClientInterface;
+use pipekung\classes\Auth;
 
 /**
  * Controller that manages user authentication process.
