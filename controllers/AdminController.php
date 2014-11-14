@@ -25,6 +25,8 @@ use yii\web\NotFoundHttpException;
  */
 class AdminController extends Controller
 {
+    public $layout = '@app/themes/bootstrap/views/layouts/admin';
+    
     /** @inheritdoc */
     public function behaviors()
     {
