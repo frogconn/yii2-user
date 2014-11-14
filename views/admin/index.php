@@ -98,7 +98,10 @@ $this->params['breadcrumbs'][] = $this->title;
                         'title' => Yii::t('yii', 'Delete'),
                     ]);
                 },
-            ]
+            ],
+            'options' => [
+                'style' => 'width: 70px;',
+            ],
         ],
     ],
 ]); ?>
