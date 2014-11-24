@@ -79,6 +79,19 @@ class User extends ActiveRecord implements IdentityInterface
         return in_array($this->username, $this->module->admins);
     }
 
+    public static function isAdmin() {
+        return !empty(User::findOne(['id' => Yii::$app->user->id, 'role' => 1]));
+    }
+
+    public static function getAdmin() {
+        $users = User::find()->where(['role' => 1])->all();
+        $user = [];
+        foreach ($users as $val) {
+            $user = $val->username;
+        }
+        return $user;
+    }
+
     /**
      * @return \yii\db\ActiveQuery
      */

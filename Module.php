@@ -12,6 +12,7 @@
 namespace dektrium\user;
 
 use yii\base\Module as BaseModule;
+use dektrium\user\models\User;
 
 /**
  * This is the main module class for the Yii2-user.
@@ -131,6 +132,7 @@ class Module extends BaseModule
                 $config['components'][$name]['class'] = $component['class'];
             }
         }
+        $this->admins = empty($this->admin) ? User::getAdmin() : $this->admin;
         parent::__construct($id, $parent, $config);
     }
 
