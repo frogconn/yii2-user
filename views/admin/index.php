@@ -82,6 +82,9 @@ $this->params['breadcrumbs'][] = $this->title;
         ],
         [
             'class' => 'yii\grid\ActionColumn',
+            'options' => [
+                'style' => 'width: 70px;',
+            ],
             'template' => '{update} {delete}',
             'buttons' => [
                 'update' => function ($url, $model) {
@@ -98,10 +101,7 @@ $this->params['breadcrumbs'][] = $this->title;
                         'title' => Yii::t('yii', 'Delete'),
                     ]);
                 },
-            ],
-            'options' => [
-                'style' => 'width: 70px;',
-            ],
+            ]
         ],
     ],
 ]); ?>
