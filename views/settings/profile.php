@@ -10,6 +10,11 @@
  */
 
 use yii\helpers\Html;
+use pipekung\widgets\Select2;
+use app\models\HrFaculty;
+use app\models\HrPosition;
+use app\models\HrLevel;
+use app\models\HrDivision;
 
 /**
  * @var yii\web\View $this
