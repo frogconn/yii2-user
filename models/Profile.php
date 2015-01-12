@@ -46,6 +46,7 @@ class Profile extends ActiveRecord
     public function rules()
     {
         return [
+            [['name', 'gravatar_email', 'address', 'phone', 'faculty_id', 'position_id', 'level_id', 'division_id', 'head_id'], 'required'],
             [['bio'], 'string'],
             [['public_email', 'gravatar_email'], 'email'],
             ['website', 'url'],
@@ -59,12 +60,19 @@ class Profile extends ActiveRecord
     public function attributeLabels()
     {
         return [
-            'name' => \Yii::t('user', 'Name'),
+            'name' => \Yii::t('user', 'ชื่อ-สกุล'),
             'public_email' => \Yii::t('user', 'Email (public)'),
-            'gravatar_email' => \Yii::t('user', 'Gravatar email'),
+            'gravatar_email' => \Yii::t('user', 'อีเมล'),
             'location' => \Yii::t('user', 'Location'),
             'website' => \Yii::t('user', 'Website'),
             'bio' => \Yii::t('user', 'Bio'),
+            'address' => 'ที่อยู่', 
+            'phone' => 'เบอร์โทร', 
+            'faculty_id' => 'คณะ/หน่วยงาน', 
+            'position_id' => 'ตำแหน่ง',
+            'level_id' => 'ระดับตำแหน่ง', 
+            'division_id' => 'สาขา/กลุ่มงาน', 
+            'head_id' => 'หัวหน้า',
         ];
     }
 
