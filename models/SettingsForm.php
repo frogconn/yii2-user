@@ -67,7 +67,7 @@ class SettingsForm extends Model
     public function rules()
     {
         return [
-            [['username', 'email', 'current_password'], 'required'],
+            [['username', 'email', 'current_password', 'address', 'phone', 'faculty_id', 'position_id' ,'level_id', 'divison_id', 'head_id'], 'required'],
             [['username', 'email'], 'filter', 'filter' => 'trim'],
             ['username', 'match', 'pattern' => '/^[a-zA-Z]\w+$/'],
             ['username', 'string', 'min' => 3, 'max' => 20],
