@@ -51,15 +51,7 @@ $this->params['breadcrumbs'][] = $this->title;
 
                 <?= $form->field($model, 'name') ?>
 
-                <?//= $form->field($model, 'public_email') ?>
-
-                <?//= $form->field($model, 'website') ?>
-
-                <?//= $form->field($model, 'location') ?>
-
                 <?= $form->field($model, 'gravatar_email')->hint(\yii\helpers\Html::a(Yii::t('user', 'Change your avatar at Gravatar.com'), 'http://gravatar.com')) ?>
-
-                <?//= $form->field($model, 'bio')->textarea() ?>
 
                 <?= $form->field($model, 'address')->textarea() ?>
 
