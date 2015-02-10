@@ -11,7 +11,6 @@
 
 namespace dektrium\user\models;
 
-use dektrium\user\helpers\ModuleTrait;
 use yii\db\ActiveRecord;
 
 /**
@@ -28,75 +27,69 @@ use yii\db\ActiveRecord;
  *
  * @author Dmitry Erofeev <dmeroff@gmail.com
  */
-class Profile extends ActiveRecord
-{
-    use ModuleTrait;
+class Profile extends ActiveRecord {
+	/** @var \dektrium\user\Module */
+	protected $module;
 
-    /**
-     * @inheritdoc
-     */
-    public static function tableName()
-    {
-        return '{{%profile}}';
-    }
+	/** @inheritdoc */
+	public function init() {
+		$this->module = \Yii::$app->getModule('user');
+	}
 
-    /**
-     * @inheritdoc
-     */
-    public function rules()
-    {
-        return [
-            [['name', 'gravatar_email', 'address', 'phone', 'faculty_id', 'position_id', 'level_id', 'division_id', 'head_id'], 'required'],
-            [['bio'], 'string'],
-            [['public_email', 'gravatar_email'], 'email'],
-            ['website', 'url'],
-            [['name', 'public_email', 'gravatar_email', 'location', 'website'], 'string', 'max' => 255],
-        ];
-    }
+	/** @inheritdoc */
+	public static function tableName() {
+		return '{{%profile}}';
+	}
 
-    /**
-     * @inheritdoc
-     */
-    public function attributeLabels()
-    {
-        return [
-            'name' => \Yii::t('user', 'ชื่อ-สกุล'),
-            'public_email' => \Yii::t('user', 'Email (public)'),
-            'gravatar_email' => \Yii::t('user', 'อีเมล'),
-            'location' => \Yii::t('user', 'Location'),
-            'website' => \Yii::t('user', 'Website'),
-            'bio' => \Yii::t('user', 'Bio'),
-            'address' => 'ที่อยู่', 
-            'phone' => 'เบอร์โทร', 
-            'faculty_id' => 'คณะ/หน่วยงาน', 
-            'position_id' => 'ตำแหน่ง',
-            'level_id' => 'ระดับตำแหน่ง', 
-            'division_id' => 'สาขา/กลุ่มงาน', 
-            'head_id' => 'หัวหน้า',
-        ];
-    }
+	/**
+	 * @inheritdoc
+	 */
+	public function rules() {
+		return [
+			[['name', 'gravatar_email', 'address', 'phone', 'faculty_id', 'position_id', 'level_id', 'division_id', 'head_id'], 'required'],
+			[['bio'], 'string'],
+			[['public_email', 'gravatar_email'], 'email'],
+			['website', 'url'],
+			[['name', 'public_email', 'gravatar_email', 'location', 'website'], 'string', 'max' => 255],
+		];
+	}
 
-    /**
-     * @inheritdoc
-     */
-    public function beforeSave($insert)
-    {
-        if (parent::beforeSave($insert)) {
-            if ($this->isAttributeChanged('gravatar_email')) {
-                $this->setAttribute('gravatar_id', md5($this->getAttribute('gravatar_email')));
-            }
+	/** @inheritdoc */
+	public function attributeLabels() {
+		return [
 
-            return true;
-        } else {
-            return false;
-        }
-    }
+			'name' => \Yii::t('user', 'Name'),
+			'public_email' => \Yii::t('user', 'Email (public)'),
+			'gravatar_email' => \Yii::t('user', 'Gravatar email'),
+			'location' => \Yii::t('user', 'Location'),
+			'website' => \Yii::t('user', 'Website'),
+			'bio' => \Yii::t('user', 'Bio'),
+			'address' => 'ที่อยู่',
+			'phone' => 'เบอร์โทร',
+			'faculty_id' => 'คณะ/หน่วยงาน',
+			'position_id' => 'ตำแหน่ง',
+			'level_id' => 'ระดับตำแหน่ง',
+			'division_id' => 'สาขา/กลุ่มงาน',
+			'head_id' => 'หัวหน้า',
+		];
+	}
 
-    /**
-     * @return \yii\db\ActiveQueryInterface
-     */
-    public function getUser()
-    {
-        return $this->hasOne('\dektrium\user\models\User', ['id' => 'user_id']);
-    }
+	/** @inheritdoc */
+	public function beforeSave($insert) {
+		if (parent::beforeSave($insert)) {
+			if ($this->isAttributeChanged('gravatar_email')) {
+				$this->setAttribute('gravatar_id', md5(strtolower($this->getAttribute('gravatar_email'))));
+			}
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * @return \yii\db\ActiveQueryInterface
+	 */
+	public function getUser() {
+		return $this->hasOne($this->module->modelMap['User'], ['id' => 'user_id']);
+	}
 }

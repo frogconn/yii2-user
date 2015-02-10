@@ -11,11 +11,16 @@
 
 namespace dektrium\user\controllers;
 
+use dektrium\user\Finder;
+use dektrium\user\models\User;
 use dektrium\user\models\UserSearch;
-use yii\web\Controller;
+use yii\base\Model;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
+use yii\web\Controller;
 use yii\web\NotFoundHttpException;
+use yii\web\Response;
+use yii\widgets\ActiveForm;
 
 /**
  * AdminController allows you to administrate users.
@@ -23,155 +28,206 @@ use yii\web\NotFoundHttpException;
  * @property \dektrium\user\Module $module
  * @author Dmitry Erofeev <dmeroff@gmail.com
  */
-class AdminController extends Controller
-{
-    public $layout = '@app/themes/bootstrap/views/layouts/admin';
-    
-    /** @inheritdoc */
-    public function behaviors()
-    {
-        return [
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'delete'  => ['post'],
-                    'confirm' => ['post'],
-                    'block'   => ['post']
-                ],
-            ],
-            'access' => [
-                'class' => AccessControl::className(),
-                'rules' => [
-                    [
-                        'actions' => ['index', 'create', 'update', 'delete', 'block', 'confirm'],
-                        'allow' => true,
-                        'roles' => ['@'],
-                        'matchCallback' => function ($rule, $action) {
-                            return in_array(\Yii::$app->user->identity->username, $this->module->admins);
-                        }
-                    ],
-                ]
-            ]
-        ];
-    }
+class AdminController extends Controller {
 
-    /**
-     * Lists all User models.
-     * @return mixed
-     */
-    public function actionIndex()
-    {
-        $searchModel  = $this->module->manager->createUserSearch();
-        $dataProvider = $searchModel->search($_GET);
+	public $layout = '@app/themes/bootstrap/views/layouts/admin';
 
-        return $this->render('index', [
-            'dataProvider' => $dataProvider,
-            'searchModel'  => $searchModel,
-        ]);
-    }
+	/** @var Finder */
+	protected $finder;
 
-    /**
-     * Creates a new User model.
-     * If creation is successful, the browser will be redirected to the 'index' page.
-     * @return mixed
-     */
-    public function actionCreate()
-    {
-        $model = $this->module->manager->createUser(['scenario' => 'create']);
+	/**
+	 * @param string $id
+	 * @param \yii\base\Module $module
+	 * @param Finder $finder
+	 * @param array $config
+	 */
+	public function __construct($id, $module, Finder $finder, $config = []) {
+		$this->finder = $finder;
+		parent::__construct($id, $module, $config);
+	}
 
-        if ($model->load(\Yii::$app->request->post()) && $model->create()) {
-            \Yii::$app->getSession()->setFlash('user.success', \Yii::t('user', 'User has been created'));
-            return $this->redirect(['index']);
-        }
+	/** @inheritdoc */
+	public function behaviors() {
+		return [
+			'verbs' => [
+				'class' => VerbFilter::className(),
+				'actions' => [
+					'delete' => ['post'],
+					'confirm' => ['post'],
+					'block' => ['post'],
+				],
+			],
+			'access' => [
+				'class' => AccessControl::className(),
+				'rules' => [
+					[
+						'actions' => ['index', 'create', 'update', 'delete', 'block', 'confirm'],
+						'allow' => true,
+						'roles' => ['@'],
+						'matchCallback' => function ($rule, $action) {
+							return \Yii::$app->user->identity->getIsAdmin();
+						},
+					],
+				],
+			],
+		];
+	}
 
-        return $this->render('create', [
-            'model' => $model
-        ]);
-    }
+	/**
+	 * Lists all User models.
+	 * @return mixed
+	 */
+	public function actionIndex() {
+		$searchModel = \Yii::createObject(UserSearch::className());
+		$dataProvider = $searchModel->search($_GET);
 
-    /**
-     * Updates an existing User model.
-     * If update is successful, the browser will be redirected to the 'index' page.
-     * @param  integer $id
-     * @return mixed
-     */
-    public function actionUpdate($id)
-    {
-        $model = $this->findModel($id);
-        $model->scenario = 'update';
+		return $this->render('index', [
+			'dataProvider' => $dataProvider,
+			'searchModel' => $searchModel,
+		]);
+	}
 
-        if ($model->load(\Yii::$app->request->post()) && $model->save()) {
-            \Yii::$app->getSession()->setFlash('user.success', \Yii::t('user', 'User has been updated'));
-            return $this->refresh();
-        }
+	/**
+	 * Creates a new User model.
+	 * If creation is successful, the browser will be redirected to the 'index' page.
+	 * @return mixed
+	 */
+	public function actionCreate() {
+		/** @var User $user */
+		$user = \Yii::createObject([
+			'class' => User::className(),
+			'scenario' => 'create',
+		]);
 
-        return $this->render('update', [
-            'model' => $model
-        ]);
-    }
+		$this->performAjaxValidation($user);
 
-    /**
-     * Confirms the User.
-     * @param $id
-     * @return \yii\web\Response
-     */
-    public function actionConfirm($id)
-    {
-        $this->findModel($id)->confirm();
-        \Yii::$app->getSession()->setFlash('user.success', \Yii::t('user', 'User has been confirmed'));
+		if ($user->load(\Yii::$app->request->post()) && $user->create()) {
+			\Yii::$app->getSession()->setFlash('success', \Yii::t('user', 'User has been created'));
+			return $this->redirect(['index']);
+		}
 
-        return $this->redirect(['update', 'id' => $id]);
-    }
+		return $this->render('create', [
+			'user' => $user,
+		]);
+	}
 
-    /**
-     * Deletes an existing User model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param  integer $id
-     * @return mixed
-     */
-    public function actionDelete($id)
-    {
-        $this->findModel($id)->delete();
-        \Yii::$app->getSession()->setFlash('user.success', \Yii::t('user', 'User has been deleted'));
+	/**
+	 * Updates an existing User model.
+	 * If update is successful, the browser will be redirected to the 'index' page.
+	 * @param  integer $id
+	 * @return mixed
+	 */
+	public function actionUpdate($id) {
+		$user = $this->findModel($id);
+		$user->scenario = 'update';
+		$profile = $this->finder->findProfileById($id);
+		$r = \Yii::$app->request;
 
-        return $this->redirect(['index']);
-    }
+		$this->performAjaxValidation([$user, $profile]);
 
-    /**
-     * Blocks the user.
-     *
-     * @param $id
-     * @return \yii\web\Response
-     */
-    public function actionBlock($id)
-    {
-        $user = $this->findModel($id);
-        if ($user->getIsBlocked()) {
-            $user->unblock();
-            \Yii::$app->getSession()->setFlash('user.success', \Yii::t('user', 'User has been unblocked'));
-        } else {
-            $user->block();
-            \Yii::$app->getSession()->setFlash('user.success', \Yii::t('user', 'User has been blocked'));
-        }
+		if ($user->load($r->post()) && $profile->load($r->post()) && $user->save() && $profile->save()) {
+			\Yii::$app->getSession()->setFlash('success', \Yii::t('user', 'User has been updated'));
+			return $this->refresh();
+		}
 
-        return $this->redirect(['index']);
-    }
+		return $this->render('update', [
+			'user' => $user,
+			'profile' => $profile,
+			'module' => $this->module,
+		]);
+	}
 
-    /**
-     * Finds the User model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param  integer                    $id
-     * @return \dektrium\user\models\User the loaded model
-     * @throws NotFoundHttpException      if the model cannot be found
-     */
-    protected function findModel($id)
-    {
-        $user = $this->module->manager->findUserById($id);
+	/**
+	 * Confirms the User.
+	 * @param integer $id
+	 * @param string  $back
+	 * @return \yii\web\Response
+	 */
+	public function actionConfirm($id, $back = 'index') {
+		$this->findModel($id)->confirm();
+		\Yii::$app->getSession()->setFlash('success', \Yii::t('user', 'User has been confirmed'));
+		$url = $back == 'index' ? ['index'] : ['update', 'id' => $id];
+		return $this->redirect($url);
+	}
 
-        if ($user === null) {
-            throw new NotFoundHttpException('The requested page does not exist');
-        }
+	/**
+	 * Deletes an existing User model.
+	 * If deletion is successful, the browser will be redirected to the 'index' page.
+	 * @param  integer $id
+	 * @return mixed
+	 */
+	public function actionDelete($id) {
+		if ($id == \Yii::$app->user->getId()) {
+			\Yii::$app->getSession()->setFlash('danger', \Yii::t('user', 'You can not remove your own account'));
+		} else {
+			$this->findModel($id)->delete();
+			\Yii::$app->getSession()->setFlash('success', \Yii::t('user', 'User has been deleted'));
+		}
+		return $this->redirect(['index']);
+	}
 
-        return $user;
-    }
+	/**
+	 * Blocks the user.
+	 * @param  integer $id
+	 * @param  string  $back
+	 * @return \yii\web\Response
+	 */
+	public function actionBlock($id, $back = 'index') {
+		if ($id == \Yii::$app->user->getId()) {
+			\Yii::$app->getSession()->setFlash('danger', \Yii::t('user', 'You can not block your own account'));
+		} else {
+			$user = $this->findModel($id);
+			if ($user->getIsBlocked()) {
+				$user->unblock();
+				\Yii::$app->getSession()->setFlash('success', \Yii::t('user', 'User has been unblocked'));
+			} else {
+				$user->block();
+				\Yii::$app->getSession()->setFlash('success', \Yii::t('user', 'User has been blocked'));
+			}
+		}
+		$url = $back == 'index' ? ['index'] : ['update', 'id' => $id];
+		return $this->redirect($url);
+	}
+
+	/**
+	 * Finds the User model based on its primary key value.
+	 * If the model is not found, a 404 HTTP exception will be thrown.
+	 * @param  integer               $id
+	 * @return User                  the loaded model
+	 * @throws NotFoundHttpException if the model cannot be found
+	 */
+	protected function findModel($id) {
+		$user = $this->finder->findUserById($id);
+		if ($user === null) {
+			throw new NotFoundHttpException('The requested page does not exist');
+		}
+		return $user;
+	}
+
+	/**
+	 * Performs AJAX validation.
+	 * @param array|Model $models
+	 * @throws \yii\base\ExitException
+	 */
+	protected function performAjaxValidation($models) {
+		if (\Yii::$app->request->isAjax) {
+			if (is_array($models)) {
+				$result = [];
+				foreach ($models as $model) {
+					if ($model->load(\Yii::$app->request->post())) {
+						\Yii::$app->response->format = Response::FORMAT_JSON;
+						$result = array_merge($result, ActiveForm::validate($model));
+					}
+				}
+				echo json_encode($result);
+				\Yii::$app->end();
+			} else {
+				if ($models->load(\Yii::$app->request->post())) {
+					\Yii::$app->response->format = Response::FORMAT_JSON;
+					echo json_encode(ActiveForm::validate($models));
+					\Yii::$app->end();
+				}
+			}
+		}
+	}
 }

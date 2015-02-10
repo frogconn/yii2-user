@@ -11,12 +11,18 @@
 
 namespace dektrium\user\controllers;
 
-use yii\helpers\Url;
-use yii\web\Controller;
+use dektrium\user\Finder;
+use dektrium\user\models\Account;
+use dektrium\user\models\LoginForm;
+use pipekung\classes\Auth;
+use yii\authclient\ClientInterface;
+use yii\base\Model;
 use yii\filters\AccessControl;
 use yii\filters\VerbFilter;
-use yii\authclient\ClientInterface;
-use pipekung\classes\Auth;
+use yii\helpers\Url;
+use yii\web\Controller;
+use yii\web\Response;
+use yii\widgets\ActiveForm;
 
 /**
  * Controller that manages user authentication process.
@@ -25,114 +31,128 @@ use pipekung\classes\Auth;
  *
  * @author Dmitry Erofeev <dmeroff@gmail.com>
  */
-class SecurityController extends Controller
-{
-    /**
-     * @inheritdoc
-     */
-    public function behaviors()
-    {
-        return [
-            'access' => [
-                'class' => AccessControl::className(),
-                'rules' => [
-                    [
-                        'allow' => true,
-                        'actions' => ['login', 'auth'],
-                        'roles' => ['?']
-                    ],
-                    [
-                        'allow' => true,
-                        'actions' => ['logout'],
-                        'roles' => ['@']
-                    ],
-                ]
-            ],
-            'verbs' => [
-                'class' => VerbFilter::className(),
-                'actions' => [
-                    'logout' => ['post']
-                ]
-            ]
-        ];
-    }
+class SecurityController extends Controller {
+	/** @var Finder */
+	protected $finder;
 
-    /**
-     * @inheritdoc
-     */
-    public function actions()
-    {
-        return [
-            'auth' => [
-                'class' => 'yii\authclient\AuthAction',
-                'successCallback' => [$this, 'authenticate'],
-            ]
-        ];
-    }
+	/**
+	 * @param string $id
+	 * @param \yii\base\Module $module
+	 * @param Finder $finder
+	 * @param array $config
+	 */
+	public function __construct($id, $module, Finder $finder, $config = []) {
+		$this->finder = $finder;
+		parent::__construct($id, $module, $config);
+	}
 
-    /**
-     * Displays the login page.
-     *
-     * @return string|\yii\web\Response
-     */
-    public function actionLogin()
-    {
-        $model = $this->module->manager->createLoginForm();
+	/** @inheritdoc */
+	public function behaviors() {
+		return [
+			'access' => [
+				'class' => AccessControl::className(),
+				'rules' => [
+					['allow' => true, 'actions' => ['login', 'auth'], 'roles' => ['?']],
+					['allow' => true, 'actions' => ['logout'], 'roles' => ['@']],
+				],
+			],
+			'verbs' => [
+				'class' => VerbFilter::className(),
+				'actions' => [
+					'logout' => ['post'],
+				],
+			],
+		];
+	}
 
-        if ($model->load(\Yii::$app->getRequest()->post())) {
+	/** @inheritdoc */
+	public function actions() {
+		return [
+			'auth' => [
+				'class' => 'yii\authclient\AuthAction',
+				'successCallback' => [$this, 'authenticate'],
+			],
+		];
+	}
 
-            $login = $_POST['login-form'];
-            $auth = new Auth($login['login'], $login['password']);
-            if ($model->login()) {
-                return $this->goBack();
-            } else {
-                $auth->ldap();
-                if ($model->login()) return $this->goBack();
-            }
-        }
+	/**
+	 * Displays the login page.
+	 * @return string|\yii\web\Response
+	 */
+	public function actionLogin() {
+		$model = \Yii::createObject(LoginForm::className());
 
-        return $this->render('login', [
-            'model' => $model
-        ]);
-    }
+		$this->performAjaxValidation($model);
 
-    /**
-     * Logs the user out and then redirects to the homepage.
-     *
-     * @return \yii\web\Response
-     */
-    public function actionLogout()
-    {
-        \Yii::$app->getUser()->logout();
+		if ($model->load(\Yii::$app->getRequest()->post())) {
 
-        return $this->goHome();
-    }
+			$login = $_POST['login-form'];
+			$auth = new Auth($login['login'], $login['password']);
+			if ($model->login()) {
+				return $this->goBack();
+			} else {
+				$auth->ldap();
+				if ($model->login()) {
+					return $this->goBack();
+				}
 
-    /**
-     * Logs the user in if this social account has been already used. Otherwise shows registration form.
-     *
-     * @param  ClientInterface $client
-     * @return \yii\web\Response
-     */
-    public function authenticate(ClientInterface $client)
-    {
-        $attributes = $client->getUserAttributes();
-        $provider   = $client->getId();
-        $clientId   = $attributes['id'];
+			}
+		}
 
-        if (null === ($account = $this->module->manager->findAccount($provider, $clientId))) {
-            $account = $this->module->manager->createAccount([
-                'provider'   => $provider,
-                'client_id'  => $clientId,
-                'data'       => json_encode($attributes)
-            ]);
-            $account->save(false);
-        }
+		return $this->render('login', [
+			'model' => $model,
+			'module' => $this->module,
+		]);
+	}
 
-        if (null === ($user = $account->user)) {
-            $this->action->successUrl = Url::to(['/user/registration/connect', 'account_id' => $account->id]);
-        } else {
-            \Yii::$app->user->login($user, $this->module->rememberFor);
-        }
-    }
+	/**
+	 * Logs the user out and then redirects to the homepage.
+	 * @return \yii\web\Response
+	 */
+	public function actionLogout() {
+		\Yii::$app->getUser()->logout();
+		return $this->goHome();
+	}
+
+	/**
+	 * Logs the user in if this social account has been already used. Otherwise shows registration form.
+	 * @param  ClientInterface $client
+	 * @return \yii\web\Response
+	 */
+	public function authenticate(ClientInterface $client) {
+		$attributes = $client->getUserAttributes();
+		$provider = $client->getId();
+		$clientId = $attributes['id'];
+
+		$account = $this->finder->findAccountByProviderAndClientId($provider, $clientId);
+
+		if ($account === null) {
+			$account = \Yii::createObject([
+				'class' => Account::className(),
+				'provider' => $provider,
+				'client_id' => $clientId,
+				'data' => json_encode($attributes),
+			]);
+			$account->save(false);
+		}
+
+		if (null === ($user = $account->user)) {
+			$this->action->successUrl = Url::to(['/user/registration/connect', 'account_id' => $account->id]);
+		} else {
+			\Yii::$app->user->login($user, $this->module->rememberFor);
+		}
+	}
+
+	/**
+	 * Performs ajax validation.
+	 * @param Model $model
+	 * @throws \yii\base\ExitException
+	 */
+	protected function performAjaxValidation(Model $model) {
+		if (\Yii::$app->request->isAjax && $model->load(\Yii::$app->request->post())) {
+			\Yii::$app->response->format = Response::FORMAT_JSON;
+			echo json_encode(ActiveForm::validate($model));
+			\Yii::$app->end();
+		}
+	}
 }

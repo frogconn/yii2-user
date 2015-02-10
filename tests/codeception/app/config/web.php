@@ -10,12 +10,15 @@ return [
     'aliases' => [
         '@dektrium/user' => realpath(__DIR__. '/../../../../'),
         '@vendor'        => VENDOR_DIR,
-        '@bower'         => VENDOR_DIR . '/bower-asset',
+        '@bower'         => VENDOR_DIR . '/bower',
     ],
     'modules' => [
         'user' => [
             'class' => 'dektrium\user\Module',
-            'admins' => ['user']
+            'admins' => ['user'],
+            'mailer' => [
+                'class' => 'app\components\MailerMock',
+            ],
         ]
     ],
     'components' => [
@@ -31,11 +34,7 @@ return [
         'db' => require __DIR__ . '/db.php',
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
-            'transport' => [
-                'class' => 'Swift_SmtpTransport',
-                'host'  => '127.0.0.1',
-                'port'  => '1025',
-            ]
+            'useFileTransport' => true
         ],
     ],
 ];
