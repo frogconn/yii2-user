@@ -103,7 +103,7 @@ class Module extends BaseModule {
 				$config['components'][$name]['class'] = $component['class'];
 			}
 		}
-		$this->admins = empty($this->admin) ? User::getAdmin() : $this->admin;
+		// $this->admins = empty($this->admin) ? User::getAdmin() : $this->admin;
 		parent::__construct($id, $parent, $config);
 	}
 
