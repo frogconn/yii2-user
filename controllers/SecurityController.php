@@ -81,22 +81,11 @@ class SecurityController extends Controller {
 	 */
 	public function actionLogin() {
 		$model = \Yii::createObject(LoginForm::className());
-
-		$this->performAjaxValidation($model);
-
+		// $this->performAjaxValidation($model);
 		if ($model->load(\Yii::$app->getRequest()->post())) {
-
-			$login = $_POST['login-form'];
-			$auth = new Auth($login['login'], $login['password']);
-			if ($model->login()) {
+			$auth = new Auth($model);
+			if ($auth->login())
 				return $this->goBack();
-			} else {
-				$auth->ldap();
-				if ($model->login()) {
-					return $this->goBack();
-				}
-
-			}
 		}
 
 		return $this->render('login', [

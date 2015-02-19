@@ -33,13 +33,13 @@ $this->params['breadcrumbs'][] = $this->title;
             </div>
             <div class="panel-body">
                 <?php $form = ActiveForm::begin([
-	'id' => 'login-form',
-	'enableAjaxValidation' => true,
-	'enableClientValidation' => false,
-	'validateOnBlur' => false,
-	'validateOnType' => false,
-	'validateOnChange' => false,
-])?>
+                    'id' => 'login-form',
+                    'enableAjaxValidation' => true,
+                    'enableClientValidation' => false,
+                    'validateOnBlur' => false,
+                    'validateOnType' => false,
+                    'validateOnChange' => false,
+                ])?>
 
                 <?=$form->field($model, 'login', ['inputOptions' => ['autofocus' => 'autofocus', 'class' => 'form-control', 'tabindex' => '1']])?>
 
@@ -58,7 +58,7 @@ $this->params['breadcrumbs'][] = $this->title;
             </p>
         <?php endif?>
         <?=Connect::widget([
-'baseAuthUrl' => ['/user/security/auth'],
-])?>
+            'baseAuthUrl' => ['/user/security/auth'],
+        ])?>
     </div>
 </div>
