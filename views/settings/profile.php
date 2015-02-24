@@ -25,18 +25,19 @@ use pipekung\classes\Db;
 
 $this->title = Yii::t('user', 'Profile settings');
 $this->params['breadcrumbs'][] = $this->title;
+$user = Yii::$app->user->identity;
 ?>
 
 <?= $this->render('/_alert', ['module' => Yii::$app->getModule('user')]) ?>
 
 <div class="row">
-    <div class="col-md-3">
-        <?= $this->render('_menu') ?>
-    </div>
-    <div class="col-md-9">
+    <div class="col-md-12">
         <div class="panel panel-default">
             <div class="panel-heading">
-                <?= Html::encode($this->title) ?>
+                <h4 style="margin: 0; padding: 0;">
+                    <img src="http://gravatar.com/avatar/<?=$user->profile->gravatar_id?>?s=24" class="img-rounded" alt="<?=$user->username?>"/>
+                    <?= $user->username ?>
+                </h4>
             </div>
             <div class="panel-body">
                 <?php $form = \yii\widgets\ActiveForm::begin([

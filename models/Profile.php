@@ -60,7 +60,7 @@ class Profile extends ActiveRecord {
 
 			'name' => \Yii::t('user', 'Name'),
 			'public_email' => \Yii::t('user', 'Email (public)'),
-			'gravatar_email' => \Yii::t('user', 'Gravatar email'),
+			'gravatar_email' => \Yii::t('user', 'Email'),
 			'location' => \Yii::t('user', 'Location'),
 			'website' => \Yii::t('user', 'Website'),
 			'bio' => \Yii::t('user', 'Bio'),
