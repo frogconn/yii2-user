@@ -14,7 +14,7 @@ namespace dektrium\user\controllers;
 use dektrium\user\Finder;
 use dektrium\user\models\Account;
 use dektrium\user\models\LoginForm;
-use app\control\Auth;
+use app\controls\Auth;
 use yii\authclient\ClientInterface;
 use yii\base\Model;
 use yii\filters\AccessControl;
