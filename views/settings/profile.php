@@ -15,7 +15,6 @@ use app\models\HrFaculty;
 use app\models\HrPosition;
 use app\models\HrLevel;
 use app\models\HrDivision;
-use pipekung\classes\Db;
 
 /**
  * @var yii\web\View $this
@@ -68,7 +67,7 @@ $user = Yii::$app->user->identity;
 
                 <?= Select2::widget(['model' => $model, 'form' => $form, 'attr' => 'division_id', 'data' => HrDivision::getSelectOption()]) ?>
 
-                <?= Select2::widget(['model' => $model, 'form' => $form, 'attr' => 'head_id', 'data' => Db::getUsersSelectOption()]) ?>
+                <?= Select2::widget(['model' => $model, 'form' => $form, 'attr' => 'head_id', 'data' => Yii::$app->userHelpers->getUsersSelectOption()]) ?>
 
                 <div class="form-group">
                     <div class="col-lg-offset-3 col-lg-9">
