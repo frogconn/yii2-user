@@ -34,7 +34,7 @@ $user = Yii::$app->user->identity;
         <div class="panel panel-default">
             <div class="panel-heading">
                 <h4 style="margin: 0; padding: 0;">
-                    <img src="http://gravatar.com/avatar/<?=$user->profile->gravatar_id?>?s=24" class="img-rounded" alt="<?=$user->username?>"/>
+                    <!-- <img src="http://gravatar.com/avatar/<?=$user->profile->gravatar_id?>?s=24" class="img-rounded" alt="<?=$user->username?>"/> -->
                     <?=$user->username?>
                 </h4>
             </div>
@@ -43,13 +43,23 @@ $user = Yii::$app->user->identity;
 	'id' => 'profile-form',
 	'options' => ['class' => 'form-horizontal'],
 	'fieldConfig' => [
-		'template' => "{label}\n<div class=\"col-lg-9\">{input}</div>\n<div class=\"col-sm-offset-3 col-lg-9\">{error}\n{hint}</div>",
-		'labelOptions' => ['class' => 'col-lg-3 control-label'],
+		'template' => "{label}\n<div class=\"col-lg-9\">{input}</div>\n<div class=\"col-sm-offset-2 col-lg-9\">{error}\n{hint}</div>",
+		'labelOptions' => ['class' => 'col-lg-2 control-label'],
 	],
 	'enableAjaxValidation' => true,
 	'enableClientValidation' => false,
 	'validateOnBlur' => false,
 ]);?>
+
+                <div class="form-group">
+                    <label class="col-lg-2 control-label"></label>
+                    <div class="col-lg-9">
+                        <img src="http://www.hrnetwork.kku.ac.th/testhr/photo/<?=Yii::$app->user->id?>.png">
+                    </div>
+                    <div class="col-sm-offset-2 col-lg-9">
+                        <div class="help-block"></div>
+                    </div>
+                </div>
 
                 <?=$form->field($model, 'name')?>
 
@@ -70,7 +80,7 @@ $user = Yii::$app->user->identity;
                 <?=Select2::widget(['model' => $model, 'form' => $form, 'attr' => 'head_id', 'data' => Yii::$app->userHelpers->getUsersSelectOption()])?>
 
                 <div class="form-group">
-                    <div class="col-lg-offset-3 col-lg-9">
+                    <div class="col-lg-offset-2 col-lg-9">
                         <?=\yii\helpers\Html::submitButton(Yii::t('user', 'Save'), ['class' => 'btn btn-block btn-success'])?><br>
                     </div>
                 </div>
