@@ -39,7 +39,16 @@ $user = Yii::$app->user->identity;
                 </h4>
             </div>
             <div class="panel-body">
-                <?php $form = \yii\widgets\ActiveForm::begin([
+                <div class="col-md-3" style="padding-top: 20px;">
+                    <div class="col-md-12" style="padding: 0 0 0 20px;">
+                        <div class="thumbnail">
+                            <img width="100%" src="http://www.hrnetwork.kku.ac.th/testhr/photo/<?=Yii::$app->user->id?>.png">
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-9">
+
+<?php $form = \yii\widgets\ActiveForm::begin([
 	'id' => 'profile-form',
 	'options' => ['class' => 'form-horizontal'],
 	'fieldConfig' => [
@@ -51,41 +60,41 @@ $user = Yii::$app->user->identity;
 	'validateOnBlur' => false,
 ]);?>
 
-                <div class="form-group">
-                    <label class="col-lg-2 control-label"></label>
-                    <div class="col-lg-9">
-                        <img src="http://www.hrnetwork.kku.ac.th/testhr/photo/<?=Yii::$app->user->id?>.png">
+                    <div class="form-group">
+                        <label class="col-lg-2 control-label"></label>
+                        <div class="col-lg-9">
+
+                        </div>
+                        <div class="col-sm-offset-2 col-lg-9">
+                            <div class="help-block"></div>
+                        </div>
                     </div>
-                    <div class="col-sm-offset-2 col-lg-9">
-                        <div class="help-block"></div>
+
+                    <?=$form->field($model, 'name')?>
+
+                    <?=$form->field($model, 'gravatar_email') //->hint(\yii\helpers\Html::a(Yii::t('user', 'Change your avatar at Gravatar.com'), 'http://gravatar.com')) ?>
+
+                    <?=$form->field($model, 'address')->textarea()?>
+
+                    <?=$form->field($model, 'phone')?>
+
+                    <?=Select2::widget(['model' => $model, 'form' => $form, 'attr' => 'faculty_id', 'data' => HrFaculty::getSelectOption()])?>
+
+                    <?=Select2::widget(['model' => $model, 'form' => $form, 'attr' => 'position_id', 'data' => HrPosition::getSelectOption()])?>
+
+                    <?=Select2::widget(['model' => $model, 'form' => $form, 'attr' => 'level_id', 'data' => HrLevel::getSelectOption()])?>
+
+                    <?=Select2::widget(['model' => $model, 'form' => $form, 'attr' => 'division_id', 'data' => HrDivision::getSelectOption()])?>
+
+                    <?=Select2::widget(['model' => $model, 'form' => $form, 'attr' => 'head_id', 'data' => Yii::$app->userHelpers->getUsersSelectOption()])?>
+
+                    <div class="form-group">
+                        <div class="col-lg-offset-2 col-lg-9">
+                            <?=\yii\helpers\Html::submitButton(Yii::t('user', 'Save'), ['class' => 'btn btn-block btn-success'])?><br>
+                        </div>
                     </div>
+                    <?php \yii\widgets\ActiveForm::end();?>
                 </div>
-
-                <?=$form->field($model, 'name')?>
-
-                <?=$form->field($model, 'gravatar_email') //->hint(\yii\helpers\Html::a(Yii::t('user', 'Change your avatar at Gravatar.com'), 'http://gravatar.com')) ?>
-
-                <?=$form->field($model, 'address')->textarea()?>
-
-                <?=$form->field($model, 'phone')?>
-
-                <?=Select2::widget(['model' => $model, 'form' => $form, 'attr' => 'faculty_id', 'data' => HrFaculty::getSelectOption()])?>
-
-                <?=Select2::widget(['model' => $model, 'form' => $form, 'attr' => 'position_id', 'data' => HrPosition::getSelectOption()])?>
-
-                <?=Select2::widget(['model' => $model, 'form' => $form, 'attr' => 'level_id', 'data' => HrLevel::getSelectOption()])?>
-
-                <?=Select2::widget(['model' => $model, 'form' => $form, 'attr' => 'division_id', 'data' => HrDivision::getSelectOption()])?>
-
-                <?=Select2::widget(['model' => $model, 'form' => $form, 'attr' => 'head_id', 'data' => Yii::$app->userHelpers->getUsersSelectOption()])?>
-
-                <div class="form-group">
-                    <div class="col-lg-offset-2 col-lg-9">
-                        <?=\yii\helpers\Html::submitButton(Yii::t('user', 'Save'), ['class' => 'btn btn-block btn-success'])?><br>
-                    </div>
-                </div>
-
-                <?php \yii\widgets\ActiveForm::end();?>
             </div>
         </div>
     </div>
