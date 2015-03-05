@@ -70,13 +70,11 @@ $user = Yii::$app->user->identity;
                         </div>
                     </div>
 
-                    <?=$form->field($model, 'name')?>
-
-                    <?=$form->field($model, 'gravatar_email') //->hint(\yii\helpers\Html::a(Yii::t('user', 'Change your avatar at Gravatar.com'), 'http://gravatar.com')) ?>
+                    <?=$form->field($model, 'fullname')?>
 
                     <?=$form->field($model, 'address')->textarea()?>
 
-                    <?=$form->field($model, 'phone')?>
+                    <?=$form->field($model, 'telephone')?>
 
                     <?=Select2::widget(['model' => $model, 'form' => $form, 'attr' => 'faculty_id', 'data' => HrFaculty::getSelectOption()])?>
 
